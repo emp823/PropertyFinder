@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, TextInput, View, TouchableHighlight, ActivityIndicator, Image } from 'react-native';
 import '../resources/house.png';
+import { SearchResults } from './search-results';
 const styles = StyleSheet.create({
     description: {
         marginBottom: 20,
@@ -64,7 +65,7 @@ function urlForQueryAndPage(key, value, pageNumber) {
     const querystring = Object.keys(data)
         .map(dataKey => `${dataKey}=${encodeURIComponent(data[dataKey])}`)
         .join('&');
-    return `http://api.nestoria.co.uk/api?${querystring}`;
+    return `https://api.nestoria.co.uk/api?${querystring}`;
 }
 export class SearchPage extends Component {
     constructor(props) {
@@ -93,7 +94,7 @@ export class SearchPage extends Component {
                 React.createElement(TextInput, { style: styles.searchInput, value: this.state.searchString, onChange: this.onSearchTextChanged.bind(this), placeholder: "Search via name or postcode" }),
                 React.createElement(TouchableHighlight, { style: styles.button, onPress: this.onSearchPressed.bind(this), underlayColor: "#99d9f4" },
                     React.createElement(Text, { style: styles.buttonText }, "Go"))),
-            React.createElement(TouchableHighlight, { style: styles.button, underlayColor: "#99d9f4" },
+            React.createElement(TouchableHighlight, { style: styles.button, onPress: this.onLocationPressed.bind(this), underlayColor: "#99d9f4" },
                 React.createElement(Text, { style: styles.buttonText }, "Location")),
             React.createElement(Image, { source: require('../resources/house.png'), style: styles.image }),
             React.createElement(Text, { style: styles.description }, this.state.message),
@@ -113,11 +114,27 @@ export class SearchPage extends Component {
     handleResponse(response) {
         this.setState({ isLoading: false, message: '' });
         if (response.application_response_code.substr(0, 1) === '1') {
-            console.log(`Properties found: ${response.listings.length}`);
+            this.props.navigator.push({
+                title: 'Results',
+                component: SearchResults,
+                passProps: { listings: response.listings }
+            });
         }
         else {
             this.setState({ message: 'Location not recognized; please try again.' });
         }
+    }
+    onLocationPressed() {
+        navigator.geolocation.getCurrentPosition(location => {
+            const search = `${location.coords.latitude},${location.coords.longitude}`;
+            this.setState({ searchString: search });
+            const query = urlForQueryAndPage('centre_point', search, 1);
+            this.executeQuery(query);
+        }, error => {
+            this.setState({
+                message: `There was a problem with obtaining your location: ${error}`
+            });
+        });
     }
 }
 //# sourceMappingURL=search-page.js.map

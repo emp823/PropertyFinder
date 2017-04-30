@@ -9,6 +9,7 @@ import {
   Image
 } from 'react-native';
 import '../resources/house.png';
+import { SearchResults } from './search-results';
 
 const styles = StyleSheet.create({
   description: {
@@ -76,7 +77,7 @@ function urlForQueryAndPage(key, value, pageNumber) {
     .map(dataKey => `${dataKey}=${encodeURIComponent(data[dataKey])}`)
     .join('&');
 
-  return `http://api.nestoria.co.uk/api?${querystring}`;
+  return `https://api.nestoria.co.uk/api?${querystring}`;
 }
 
 export class SearchPage extends Component<any, any> {
@@ -90,9 +91,7 @@ export class SearchPage extends Component<any, any> {
   }
 
   onSearchTextChanged(event) {
-    console.log('onSearchTextChanged');
     this.setState({ searchString: event.nativeEvent.text });
-    console.log(this.state.searchString);
   }
 
   onSearchPressed() {
@@ -124,6 +123,7 @@ export class SearchPage extends Component<any, any> {
           </TouchableHighlight>
         </View>
         <TouchableHighlight style={styles.button}
+            onPress={this.onLocationPressed.bind(this)}
             underlayColor="#99d9f4">
           <Text style={styles.buttonText}>Location</Text>
         </TouchableHighlight>
@@ -135,7 +135,6 @@ export class SearchPage extends Component<any, any> {
   }
 
   private executeQuery(query) {
-    console.log(query);
     this.setState({ isLoading: true });
     fetch(query)
       .then(response => response.json() as Promise<{response: string}>)
@@ -150,9 +149,28 @@ export class SearchPage extends Component<any, any> {
   private handleResponse(response) {
     this.setState({ isLoading: false , message: '' });
     if (response.application_response_code.substr(0, 1) === '1') {
-      console.log(`Properties found: ${response.listings.length}`);
+      this.props.navigator.push({
+        title: 'Results',
+        component: SearchResults,
+        passProps: {listings: response.listings}
+      });
     } else {
       this.setState({ message: 'Location not recognized; please try again.'});
     }
+  }
+
+  private onLocationPressed() {
+    navigator.geolocation.getCurrentPosition(
+      location => {
+        const search = `${location.coords.latitude},${location.coords.longitude}`;
+        this.setState({ searchString: search });
+        const query = urlForQueryAndPage('centre_point', search, 1);
+        this.executeQuery(query);
+      },
+      error => {
+        this.setState({
+          message: `There was a problem with obtaining your location: ${error}`
+        });
+      });
   }
 }

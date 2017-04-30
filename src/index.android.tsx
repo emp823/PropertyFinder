@@ -1,7 +1,6 @@
 /**
  * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Erik Pearson
  */
 
 import React from 'react';
@@ -12,10 +11,7 @@ import {
   View
 } from 'react-native';
 
-export interface Props { }
-export interface State { }
-
-export default class PropertyFinder extends React.Component<Props, State> {
+export default class PropertyFinder extends React.Component<any, any> {
   render() {
     return (
       <View style={styles.container}>

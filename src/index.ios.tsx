@@ -1,7 +1,6 @@
 /**
  * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
+ * Erik Pearson
  */
 
 import React from 'react';
@@ -9,8 +8,6 @@ import {
   AppRegistry,
   NavigatorIOS,
   StyleSheet
-  // Text,
-  // View
 } from 'react-native';
 import { SearchPage } from './search-page';
 
