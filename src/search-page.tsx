@@ -76,7 +76,7 @@ function urlForQueryAndPage(key, value, pageNumber) {
     .map(dataKey => `${dataKey}=${encodeURIComponent(data[dataKey])}`)
     .join('&');
 
-  return 'http://api.nestoria.co.uk/api?' + querystring;
+  return `http://api.nestoria.co.uk/api?${querystring}`;
 }
 
 export class SearchPage extends Component<any, any> {
@@ -84,7 +84,8 @@ export class SearchPage extends Component<any, any> {
     super(props);
     this.state = {
       searchString: 'london',
-      loading: false
+      isLoading: false,
+      message: ''
     };
   }
 
@@ -127,6 +128,7 @@ export class SearchPage extends Component<any, any> {
           <Text style={styles.buttonText}>Location</Text>
         </TouchableHighlight>
         <Image source={require('../resources/house.png')} style={styles.image}/>
+        <Text style={styles.description}>{this.state.message}</Text>
         {spinner}
       </View>
     );
@@ -135,5 +137,22 @@ export class SearchPage extends Component<any, any> {
   private executeQuery(query) {
     console.log(query);
     this.setState({ isLoading: true });
+    fetch(query)
+      .then(response => response.json() as Promise<{response: string}>)
+      .then(json => this.handleResponse(json.response))
+      .catch(error =>
+        this.setState({
+          isLoading: false,
+          message: `Something bad happened ${error}`
+      }));
+  }
+
+  private handleResponse(response) {
+    this.setState({ isLoading: false , message: '' });
+    if (response.application_response_code.substr(0, 1) === '1') {
+      console.log(`Properties found: ${response.listings.length}`);
+    } else {
+      this.setState({ message: 'Location not recognized; please try again.'});
+    }
   }
 }

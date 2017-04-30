@@ -64,14 +64,15 @@ function urlForQueryAndPage(key, value, pageNumber) {
     const querystring = Object.keys(data)
         .map(dataKey => `${dataKey}=${encodeURIComponent(data[dataKey])}`)
         .join('&');
-    return 'http://api.nestoria.co.uk/api?' + querystring;
+    return `http://api.nestoria.co.uk/api?${querystring}`;
 }
 export class SearchPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
             searchString: 'london',
-            loading: false
+            isLoading: false,
+            message: ''
         };
     }
     onSearchTextChanged(event) {
@@ -95,11 +96,28 @@ export class SearchPage extends Component {
             React.createElement(TouchableHighlight, { style: styles.button, underlayColor: "#99d9f4" },
                 React.createElement(Text, { style: styles.buttonText }, "Location")),
             React.createElement(Image, { source: require('../resources/house.png'), style: styles.image }),
+            React.createElement(Text, { style: styles.description }, this.state.message),
             spinner));
     }
     executeQuery(query) {
         console.log(query);
         this.setState({ isLoading: true });
+        fetch(query)
+            .then(response => response.json())
+            .then(json => this.handleResponse(json.response))
+            .catch(error => this.setState({
+            isLoading: false,
+            message: `Something bad happened ${error}`
+        }));
+    }
+    handleResponse(response) {
+        this.setState({ isLoading: false, message: '' });
+        if (response.application_response_code.substr(0, 1) === '1') {
+            console.log(`Properties found: ${response.listings.length}`);
+        }
+        else {
+            this.setState({ message: 'Location not recognized; please try again.' });
+        }
     }
 }
 //# sourceMappingURL=search-page.js.map
