@@ -36,7 +36,7 @@ export class SearchResults extends Component {
             dataSource: dataSource.cloneWithRows(this.props.listings)
         };
     }
-    renderRow(rowData, sectionID, rowID) {
+    renderRow(rowData) {
         const price = rowData.price_formatted.split(' ')[0];
         return (React.createElement(TouchableHighlight, { onPress: () => this.rowPressed(rowData.lister_url), underlayColor: "#dddddd" },
             React.createElement(View, null,

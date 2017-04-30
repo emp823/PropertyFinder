@@ -77,9 +77,7 @@ export class SearchPage extends Component {
         };
     }
     onSearchTextChanged(event) {
-        console.log('onSearchTextChanged');
         this.setState({ searchString: event.nativeEvent.text });
-        console.log(this.state.searchString);
     }
     onSearchPressed() {
         const query = urlForQueryAndPage('place_name', this.state.searchString, 1);
@@ -101,7 +99,6 @@ export class SearchPage extends Component {
             spinner));
     }
     executeQuery(query) {
-        console.log(query);
         this.setState({ isLoading: true });
         fetch(query)
             .then(response => response.json())
